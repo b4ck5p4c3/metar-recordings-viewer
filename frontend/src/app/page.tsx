@@ -2,7 +2,7 @@
 
 import {Separator} from "@/components/ui/separator";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Loader2, Pencil} from "lucide-react";
 import {getClient, R, UnauthorizedError} from "@/lib/api/client";
@@ -14,7 +14,7 @@ import Image from "next/image";
 import {DynamicRecordingDTO, RecordingDTO, RecordingUpdateData} from "@/lib/types";
 import logo from "@/static/images/logo.svg";
 
-export function Recording({recording, authorized}: { recording: DynamicRecordingDTO, authorized: boolean }) {
+function Recording({recording, authorized}: { recording: DynamicRecordingDTO, authorized: boolean }) {
     return <TableRow>
         {
             recording.data ? <><TableCell>{recording.data.timestamp.toLocaleString()}</TableCell>
@@ -142,7 +142,7 @@ export default function RecordingsPage() {
         });
     }
 
-    function reconnect() {
+    const reconnect = useCallback(() => {
         websocket = new WebSocket(`${process.env.NEXT_PUBLIC_API_BASE_URL}feed`);
         websocket.addEventListener("close", () => {
             setTimeout(() => reconnect(), 1000);
@@ -155,7 +155,7 @@ export default function RecordingsPage() {
             setFeedState("live");
         });
         setFeedState("connecting");
-    }
+    }, []);
 
     useEffect(() => {
         (async () => {
