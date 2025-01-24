@@ -1,0 +1,248 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+        "/api/recordings": {
+            "get": {
+                "operationId": "RecordingsController_findAll",
+                "parameters": [
+                    {
+                        "name": "offset",
+                        "required": true,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "count",
+                        "required": true,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "orderBy",
+                        "required": true,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "orderDirection",
+                        "required": true,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecordingsDTO"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Erroneous response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Get all recordings",
+                "tags": [
+                    "recordings"
+                ]
+            }
+        },
+        "/api/recordings/{id}": {
+            "get": {
+                "operationId": "RecordingsController_findById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecordingDTO"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Erroneous response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "summary": "Get recording by id",
+                "tags": [
+                    "recordings"
+                ]
+            }
+        },
+        "/api/auth/self": {
+            "get": {
+                "operationId": "AuthController_getSelf",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SelfAuthInfoDTO"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Erroneous response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorApiResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookie": []
+                    }
+                ],
+                "summary": "Get self member auth info",
+                "tags": [
+                    "auth"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "Metar recordings viewer",
+        "description": "Metar recordings viewer",
+        "version": "1.0",
+        "contact": {}
+    },
+    "tags": [],
+    "servers": [],
+    "components": {
+        "securitySchemes": {
+            "cookie": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "session"
+            }
+        },
+        "schemas": {
+            "RecordingDTO": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "length": {
+                        "type": "number"
+                    },
+                    "url": {
+                        "type": "string",
+                        "format": "url"
+                    },
+                    "whisperText": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "processedText": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "id",
+                    "timestamp",
+                    "length",
+                    "url",
+                    "whisperText",
+                    "processedText"
+                ]
+            },
+            "RecordingsDTO": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "number"
+                    },
+                    "recordings": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RecordingDTO"
+                        }
+                    }
+                },
+                "required": [
+                    "count",
+                    "recordings"
+                ]
+            },
+            "ErrorApiResponse": {
+                "type": "object",
+                "properties": {
+                    "statusCode": {
+                        "type": "number"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "statusCode",
+                    "message"
+                ]
+            },
+            "SelfAuthInfoDTO": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "id"
+                ]
+            }
+        }
+    }
+}
