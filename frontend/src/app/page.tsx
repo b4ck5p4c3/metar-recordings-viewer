@@ -159,15 +159,16 @@ export default function RecordingsPage() {
             processRecordingsData(...recordingsData.recordings);
 
             let websocket: WebSocket | null = null;
+            let open = false;
 
             function reconnect() {
+                if (open) {
+                    return;
+                }
+                open = true;
                 websocket = new WebSocket(`${process.env.NEXT_PUBLIC_API_BASE_URL}feed`);
-                let closed = false;
                 websocket.addEventListener("close", () => {
-                    if (closed) {
-                        return;
-                    }
-                    closed = true;
+                    open = false;
                     setTimeout(() => reconnect(), 1000);
                 });
                 websocket.addEventListener("message", message => {
