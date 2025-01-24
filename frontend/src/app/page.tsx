@@ -140,10 +140,8 @@ export default function RecordingsPage() {
         });
     }
 
-    let websocket: WebSocket | null = null;
-
     function reconnectFeed() {
-        websocket = new WebSocket(`${process.env.NEXT_PUBLIC_API_BASE_URL}feed`);
+        const websocket = new WebSocket(`${process.env.NEXT_PUBLIC_API_BASE_URL}feed`);
         websocket.addEventListener("close", () => {
             setTimeout(() => reconnectFeed(), 1000);
         });
@@ -153,6 +151,9 @@ export default function RecordingsPage() {
         });
         websocket.addEventListener("open", () => {
             setFeedState("live");
+        });
+        websocket.addEventListener("error", () => {
+            websocket.close();
         });
         setFeedState("connecting");
     }
@@ -176,7 +177,7 @@ export default function RecordingsPage() {
 
             reconnectFeed();
         })();
-    }, [client]);
+    }, []);
 
     return <div className={"flex flex-col gap-5 w-9/12 m-auto mt-5"}>
         <div className={"flex flex-row justify-between items-center"}>
