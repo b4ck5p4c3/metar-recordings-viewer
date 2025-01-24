@@ -63,82 +63,6 @@ export default function RecordingsPage() {
 
     const [recordings, setRecordings] = useState<DynamicRecordingDTO[]>([]);
 
-    function processRecordingsData(...data: (RecordingDTO & { hasWhisperNow?: boolean })[]) {
-        setRecordings(oldRecordings => {
-            const newRecordings: DynamicRecordingDTO[] = [];
-            for (const recording of data) {
-                const existingRecording = oldRecordings.find(item => item.id === recording.id);
-                if (existingRecording) {
-                    recording.hasWhisperNow = recording.hasWhisperNow === undefined || recording.hasWhisperNow;
-                    if (!existingRecording.data) {
-                        existingRecording.data = {
-                            timestamp: new Date(recording.timestamp),
-                            length: recording.length,
-                            url: recording.url,
-                            whisperText: recording.whisperText ?? null,
-                            processedText: recording.processedText ?? null
-                        };
-                    }
-                    if (recording.hasWhisperNow) {
-                        existingRecording.data.whisperText = recording.whisperText ?? null;
-                        existingRecording.data.processedText = recording.processedText ?? null;
-                        existingRecording.hasWhisperNow = true;
-
-                    }
-                } else {
-                    newRecordings.push({
-                        id: recording.id,
-                        data: {
-                            timestamp: new Date(recording.timestamp),
-                            length: recording.length,
-                            url: recording.url,
-                            whisperText: recording.whisperText ?? null,
-                            processedText: recording.processedText ?? null,
-                        },
-                        hasWhisperNow: true
-                    })
-                }
-            }
-            return [...newRecordings, ...oldRecordings];
-        });
-    }
-
-    function fetchRecordingData(id: string, hasWhisperNow: boolean) {
-        (async () => {
-            const response = R(await client.GET("/api/recordings/{id}", {
-                params: {
-                    path: {
-                        id
-                    }
-                }
-            }));
-
-            const recordingData = response.data!;
-            processRecordingsData({
-                ...recordingData,
-                hasWhisperNow
-            });
-        })();
-    }
-
-    function processMessage(data: RecordingUpdateData) {
-        setRecordings(oldRecordings => {
-            if (data.parsed) {
-                fetchRecordingData(data.id, true);
-                return oldRecordings;
-            }
-            const newRecordings: DynamicRecordingDTO[] = [{
-                id: data.id,
-                data: null,
-                hasWhisperNow: false
-            }, ...oldRecordings];
-            fetchRecordingData(data.id, false);
-            while (newRecordings.length > 50) {
-                newRecordings.pop();
-            }
-            return newRecordings;
-        });
-    }
 
     useEffect(() => {
         (async () => {
@@ -154,6 +78,83 @@ export default function RecordingsPage() {
             }));
 
             const recordingsData = recordingsResponse.data!;
+
+            function processRecordingsData(...data: (RecordingDTO & { hasWhisperNow?: boolean })[]) {
+                setRecordings(oldRecordings => {
+                    const newRecordings: DynamicRecordingDTO[] = [];
+                    for (const recording of data) {
+                        const existingRecording = oldRecordings.find(item => item.id === recording.id);
+                        if (existingRecording) {
+                            recording.hasWhisperNow = recording.hasWhisperNow === undefined || recording.hasWhisperNow;
+                            if (!existingRecording.data) {
+                                existingRecording.data = {
+                                    timestamp: new Date(recording.timestamp),
+                                    length: recording.length,
+                                    url: recording.url,
+                                    whisperText: recording.whisperText ?? null,
+                                    processedText: recording.processedText ?? null
+                                };
+                            }
+                            if (recording.hasWhisperNow) {
+                                existingRecording.data.whisperText = recording.whisperText ?? null;
+                                existingRecording.data.processedText = recording.processedText ?? null;
+                                existingRecording.hasWhisperNow = true;
+
+                            }
+                        } else {
+                            newRecordings.push({
+                                id: recording.id,
+                                data: {
+                                    timestamp: new Date(recording.timestamp),
+                                    length: recording.length,
+                                    url: recording.url,
+                                    whisperText: recording.whisperText ?? null,
+                                    processedText: recording.processedText ?? null,
+                                },
+                                hasWhisperNow: true
+                            })
+                        }
+                    }
+                    return [...newRecordings, ...oldRecordings];
+                });
+            }
+
+            function fetchRecordingData(id: string, hasWhisperNow: boolean) {
+                (async () => {
+                    const response = R(await client.GET("/api/recordings/{id}", {
+                        params: {
+                            path: {
+                                id
+                            }
+                        }
+                    }));
+
+                    const recordingData = response.data!;
+                    processRecordingsData({
+                        ...recordingData,
+                        hasWhisperNow
+                    });
+                })();
+            }
+
+            function processMessage(data: RecordingUpdateData) {
+                setRecordings(oldRecordings => {
+                    if (data.parsed) {
+                        fetchRecordingData(data.id, true);
+                        return oldRecordings;
+                    }
+                    const newRecordings: DynamicRecordingDTO[] = [{
+                        id: data.id,
+                        data: null,
+                        hasWhisperNow: false
+                    }, ...oldRecordings];
+                    fetchRecordingData(data.id, false);
+                    while (newRecordings.length > 50) {
+                        newRecordings.pop();
+                    }
+                    return newRecordings;
+                });
+            }
 
             processRecordingsData(...recordingsData.recordings);
 
