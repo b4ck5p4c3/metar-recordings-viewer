@@ -176,7 +176,7 @@ export default function RecordingsPage() {
 
             reconnect();
         })();
-    }, []);
+    }, [client, reconnect]);
 
     return <div className={"flex flex-col gap-5 w-9/12 m-auto mt-5"}>
         <div className={"flex flex-row justify-between items-center"}>
