@@ -142,21 +142,6 @@ export default function RecordingsPage() {
         });
     }
 
-    const reconnect = useCallback(() => {
-        websocket = new WebSocket(`${process.env.NEXT_PUBLIC_API_BASE_URL}feed`);
-        websocket.addEventListener("close", () => {
-            setTimeout(() => reconnect(), 1000);
-        });
-        websocket.addEventListener("message", message => {
-            const data = JSON.parse(message.data) as RecordingUpdateData;
-            processMessage(data);
-        });
-        websocket.addEventListener("open", () => {
-            setFeedState("live");
-        });
-        setFeedState("connecting");
-    }, []);
-
     useEffect(() => {
         (async () => {
             const recordingsResponse = R(await client.GET("/api/recordings", {
@@ -174,9 +159,26 @@ export default function RecordingsPage() {
 
             processRecordingsData(...recordingsData.recordings);
 
+            let websocket: WebSocket | null = null;
+
+            function reconnect() {
+                websocket = new WebSocket(`${process.env.NEXT_PUBLIC_API_BASE_URL}feed`);
+                websocket.addEventListener("close", () => {
+                    setTimeout(() => reconnect(), 1000);
+                });
+                websocket.addEventListener("message", message => {
+                    const data = JSON.parse(message.data) as RecordingUpdateData;
+                    processMessage(data);
+                });
+                websocket.addEventListener("open", () => {
+                    setFeedState("live");
+                });
+                setFeedState("connecting");
+            }
+
             reconnect();
         })();
-    }, [client, reconnect]);
+    }, [client]);
 
     return <div className={"flex flex-col gap-5 w-9/12 m-auto mt-5"}>
         <div className={"flex flex-row justify-between items-center"}>
