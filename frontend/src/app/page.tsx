@@ -162,7 +162,12 @@ export default function RecordingsPage() {
 
             function reconnect() {
                 websocket = new WebSocket(`${process.env.NEXT_PUBLIC_API_BASE_URL}feed`);
+                let closed = false;
                 websocket.addEventListener("close", () => {
+                    if (closed) {
+                        return;
+                    }
+                    closed = true;
                     setTimeout(() => reconnect(), 1000);
                 });
                 websocket.addEventListener("message", message => {
