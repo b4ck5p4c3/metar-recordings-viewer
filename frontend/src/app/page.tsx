@@ -2,7 +2,7 @@
 
 import {Separator} from "@/components/ui/separator";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Loader2, Pencil} from "lucide-react";
 import {getClient, R, UnauthorizedError} from "@/lib/api/client";
@@ -62,8 +62,6 @@ export default function RecordingsPage() {
     });
 
     const [recordings, setRecordings] = useState<DynamicRecordingDTO[]>([]);
-
-    let websocket: WebSocket | null = null;
 
     function processRecordingsData(...data: (RecordingDTO & { hasWhisperNow?: boolean })[]) {
         setRecordings(oldRecordings => {
